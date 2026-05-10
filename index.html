@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ฝ่าตะลุย คณิต ก.พ. - คลิกดูภาพใหญ่</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --dark-blue: #2c3e50;
+            --soft-gray: #f0f2f5;
+            --white: #ffffff;
+            --border-color: #2c3e50;
+        }
+
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: var(--soft-gray);
+            margin: 0;
+            padding: 0;
+            color: var(--dark-blue);
+        }
+
+        /* Header: โลโก้เต็มวง 100% */
+        header {
+            background: var(--white);
+            padding: 15px 5%;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 2px solid var(--border-color);
+            margin-right: 15px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            flex-shrink: 0;
+        }
+
+        .logo-circle img {
+            width: 160%;
+            height: 160%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+
+        /* การ์ดสินค้าแบบกดไม่ได้ */
+        .product-card {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            border: 2px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+
+        /* ส่วนหุ้มภาพ: เพิ่ม cursor pointer เพื่อบอกว่าคลิกได้ */
+        .product-img-wrapper {
+            width: 100%;
+            height: 160px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            background: #fff;
+            border: 1px solid #eee;
+            cursor: pointer; /* เพิ่มเพื่อให้รู้ว่าคลิกดูรูปใหญ่ได้ */
+            transition: transform 0.2s;
+        }
+
+        .product-img-wrapper:hover {
+            transform: scale(1.03); /* ขยายเล็กน้อยเมื่อชี้ */
+        }
+
+        .product-img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 5px;
+        }
+
+        .product-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            height: 2.4em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .price-tag {
+            background: #f8fafc;
+            color: var(--dark-blue);
+            border: 2px solid var(--border-color);
+            padding: 5px 30px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+            align-self: center;
+        }
+
+        .promo-box {
+            border: 3px solid var(--border-color);
+            background: var(--white);
+            border-radius: 15px;
+            padding: 35px;
+            text-align: center;
+            color: var(--dark-blue);
+        }
+
+        .promo-title {
+            font-size: 2.8rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        /* -------------------------------------------------------------------------- */
+        /* --- CSS สำหรับหน้าจอขยายภาพ (Lightbox/Modal) ที่เพิ่มเข้ามาใหม่ --- */
+        /* -------------------------------------------------------------------------- */
+        .image-viewer-modal {
+            display: none; /* ปิดไว้ตอนเริ่มต้น */
+            position: fixed;
+            z-index: 2000; /* ให้อยู่เหนือทุกอย่าง */
+            padding-top: 50px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.9); /* พื้นหลังสีดำโปร่งแสง */
+            backdrop-filter: blur(5px); /* เบลอพื้นหลังเล็กน้อย */
+        }
+
+        .modal-content {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 85vh; /* จำกัดความสูงไม่ให้เลยหน้าจอ */
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+            
+            /* แอนิเมชั่นตอนเปิด */
+            -webkit-animation-name: zoom;
+            -webkit-animation-duration: 0.3s;
+            animation-name: zoom;
+            animation-duration: 0.3s;
+        }
+
+        @-webkit-keyframes zoom {
+            from {-webkit-transform:scale(0)} 
+            to {-webkit-transform:scale(1)}
+        }
+
+        @keyframes zoom {
+            from {transform:scale(0)} 
+            to {transform:scale(1)}
+        }
+
+        /* ปุ่มปิด (X) */
+        .close-viewer {
+            position: absolute;
+            top: 20px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+            z-index: 2001;
+        }
+
+        .close-viewer:hover,
+        .close-viewer:focus {
+            color: #ff6b6b;
+            text-decoration: none;
+        }
+
+        /* ข้อความอธิบายใต้ภาพ (ถ้ามี) */
+        #viewer-caption {
+            margin: auto;
+            display: block;
+            width: 80%;
+            max-width: 700px;
+            text-align: center;
+            color: #ccc;
+            padding: 15px 0;
+            font-size: 1.1rem;
+        }
+
+        /* ปรับแต่งสำหรับมือถือ */
+        @media only screen and (max-width: 700px){
+            .modal-content {
+                width: 100%;
+                max-height: 70vh;
+            }
+            .close-viewer {
+                right: 20px;
+                top: 10px;
+                font-size: 35px;
+            }
+        }
+
+        /* Responsive Grid เดิม */
+        @media (max-width: 900px) {
+            .product-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 600px) {
+            .product-grid { grid-template-columns: 1fr; }
+            .promo-title { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo-container">
+        <div class="logo-circle">
+            <img src="1.png" alt="โลโก้">
+        </div>
+        <div class="header-title">ฝ่าตะลุย คณิต ก.พ.</div>
+    </div>
+</header>
+
+<div class="container">
+    <p style="text-align: center; color: #666; margin-bottom: 30px;">(คลิกที่รูปภาพเพื่อดูแนวข้อสอบแบบเต็มจอ)</p>
+    
+    <div class="product-grid">
+        <div class="product-card">
+            <div class="product-img-wrapper js-expandable-img">
+                <img src="เงื่อนไข.png" alt="แนวข้อสอบ เงื่อนไขภาษา">
+            </div>
+            <div class="product-name">เงื่อนไขภาษา (49 ข้อ)</div>
+            <div class="price-tag">29 ฿</div>
+        </div>
+
+        <div class="product-card">
+            <div class="product-img-wrapper js-expandable-img">
+                <img src="Operation.png" alt="แนวข้อสอบ Operation">
+            </div>
+            <div class="product-name">Operation (30 ข้อ)</div>
+            <div class="price-tag">29 ฿</div>
+        </div>
+
+        <div class="product-card">
+            <div class="product-img-wrapper js-expandable-img">
+                <img src="ตาราง.png" alt="แนวข้อสอบ ตารางข้อมูล">
+            </div>
+            <div class="product-name">ตารางข้อมูล (50 ข้อ)</div>
+            <div class="price-tag">29 ฿</div>
+        </div>
+
+        <div class="product-card">
+            <div class="product-img-wrapper js-expandable-img">
+                <img src="สัญลักษณ์.png" alt="แนวข้อสอบ สัญลักษณ์ ก.พ.">
+            </div>
+            <div class="product-name">สัญลักษณ์ ก.พ. (25 ข้อ)</div>
+            <div class="price-tag">29 ฿</div>
+        </div>
+
+        <div class="product-card">
+            <div class="product-img-wrapper js-expandable-img">
+                <img src="อนุกรม.png" alt="แนวข้อสอบ อนุกรม ก.พ.">
+            </div>
+            <div class="product-name">อนุกรม ก.พ. (50 ข้อ)</div>
+            <div class="price-tag">29 ฿</div>
+        </div>
+
+        <div class="product-card">
+            <div class="product-img-wrapper js-expandable-img">
+                <img src="อุปมาอุปไมย.png" alt="แนวข้อสอบ อุปมาอุปไมย">
+            </div>
+            <div class="product-name">อุปมาอุปไมย (100 ข้อ)</div>
+            <div class="price-tag">29 ฿</div>
+        </div>
+    </div>
+
+    <div class="promo-box">
+        <div class="promo-title">6 + 1 ราคาพิเศษ 149.-</div>
+        <p style="font-size: 1.1rem; margin-top: 10px; color: #666;">รับครบทุกไฟล์ + แถมโจทย์พิเศษ (ไฟล์ PDF คมชัด จัดส่งทันที)</p>
+    </div>
+</div>
+
+<footer style="text-align: center; padding: 40px; color: #888;">
+    &copy; 2026 ฝ่าตะลุย คณิต ก.พ.
+</footer>
+
+<div id="imageViewerModal" class="image-viewer-modal">
+    <span class="close-viewer">&times;</span>
+    
+    <img class="modal-content" id="fullScreenImage">
+    
+    <div id="viewer-caption"></div>
+</div>
+
+<script>
+    // 1. อ้างอิง Element ต่างๆ จาก DOM
+    const modal = document.getElementById("imageViewerModal");
+    const modalImg = document.getElementById("fullScreenImage");
+    const captionText = document.getElementById("viewer-caption");
+    const closeBtn = document.getElementsByClassName("close-viewer")[0];
+    const expandableImages = document.querySelectorAll('.js-expandable-img');
+
+    // 2. ฟังก์ชันสำหรับเปิด Modal และใส่รูปภาพ
+    expandableImages.forEach(wrapper => {
+        wrapper.addEventListener('click', function() {
+            // ดึง Element รูปภาพที่อยู่ข้างใน wrapper ที่ถูกคลิก
+            const img = this.querySelector('img');
+            
+            // เปิด Modal
+            modal.style.display = "block";
+            // เอาลิงก์รูปภาพ (src) ไปใส่ใน Modal
+            modalImg.src = img.src;
+            // เอาข้อความ alt ไปใส่เป็นคำอธิบายใต้ภาพ
+            captionText.innerHTML = img.alt;
+            
+            // ป้องกันไม่ให้ scroll พื้นหลังตอนเปิด Modal
+            document.body.style.overflow = 'hidden';
+        });
+    });
+
+    // 3. ฟังก์ชันสำหรับปิด Modal เมื่อคลิกปุ่ม (X)
+    closeBtn.onclick = function() {
+        closeModal();
+    }
+
+    // 4. ฟังก์ชันสำหรับปิด Modal เมื่อคลิกพื้นที่ว่างสีดำด้านนอกรูป
+    modal.onclick = function(event) {
+        // ตรวจสอบว่าคลิกที่พื้นหลัง (Modal) ไม่ใช่คลิกที่ตัวรูปภาพ
+        if (event.target === modal) {
+            closeModal();
+        }
+    }
+
+    // 5. ฟังก์ชันสำหรับปิด Modal เมื่อกดปุ่ม Esc บนคีย์บอร์ด
+    document.addEventListener('keydown', function(event) {
+        if (event.key === "Escape" && modal.style.display === "block") {
+            closeModal();
+        }
+    });
+
+    // ฟังก์ชันกลางสำหรับปิด Modal และคืนค่า scroll
+    function closeModal() {
+        modal.style.display = "none";
+        document.body.style.overflow = 'auto'; // คืนค่า scroll พื้นหลัง
+    }
+</script>
+
+</body>
+</html>
